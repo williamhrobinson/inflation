@@ -7,11 +7,7 @@ FRED_KEY = dbutils.secrets.get(scope="fred", key="api_key")
 SERIES = [
     "CPIAUCSL",
     "CPILFESL",
-    "MEDCPIM157SFRBCLE",
-    "TRMMEANCPIM157SFRBCLE",
-    "SNDR",
-    "NDR12MCD",
-    "DGS3MO"
+    "FEDFUNDS"
 ]
 
 def _fred_get(endpoint, **params):
