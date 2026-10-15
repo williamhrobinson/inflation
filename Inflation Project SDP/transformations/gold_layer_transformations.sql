@@ -107,11 +107,12 @@ SELECT
         2
     ) AS fed_funds_real_rate_proxy,
     CASE
-        WHEN fed_funds_rate_change_mom < 0 THEN 'Deeply Expansionary'
-        WHEN (fed_funds_rate_change_mom >= 0 AND fed_funds_rate_change_mom < 0.05) THEN 'Expansionary'
-        WHEN (fed_funds_rate_change_mom >= 0.05 AND fed_funds_rate_change_mom < 1.5) THEN 'Equilibrium'
-        WHEN (fed_funds_rate_change_mom >= 1.5 AND fed_funds_rate_change_mom < 3) THEN 'Contractionary'
-        ELSE 'Severely Contractionary'
+        WHEN fed_funds_real_rate_proxy < 0 THEN 'Deeply Expansionary'
+        WHEN (fed_funds_real_rate_proxy >= 0 AND fed_funds_real_rate_proxy < 0.05) THEN 'Expansionary'
+        WHEN (fed_funds_real_rate_proxy >= 0.05 AND fed_funds_real_rate_proxy < 1.5) THEN 'Equilibrium'
+        WHEN (fed_funds_real_rate_proxy >= 1.5 AND fed_funds_real_rate_proxy < 3) THEN 'Contractionary'
+        WHEN fed_funds_real_rate_proxy >= 3 THEN 'Severely Contractionary'
+        ELSE NULL
     END AS real_rate_range
 
 FROM monthly_metrics;
