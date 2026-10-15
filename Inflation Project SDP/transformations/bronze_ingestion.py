@@ -5,8 +5,8 @@ import requests, pandas as pd, time
 FRED_KEY = dbutils.secrets.get(scope="fred", key="api_key")
 
 SERIES = [
-    "CPIAUCSL",
-    "CPILFESL",
+    "CPIAUCNS",
+    "CPILFENS",
     "FEDFUNDS"
 ]
 

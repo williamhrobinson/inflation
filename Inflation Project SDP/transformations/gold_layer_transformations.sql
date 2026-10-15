@@ -14,13 +14,13 @@ WITH monthly_pivot AS (
 
         MAX(
             CASE
-                WHEN series_id = 'CPIAUCSL' THEN value
+                WHEN series_id = 'CPIAUCNS' THEN value
             END
         ) AS headline_cpi_index,
 
         MAX(
             CASE
-                WHEN series_id = 'CPILFESL' THEN value
+                WHEN series_id = 'CPILFENS' THEN value
             END
         ) AS core_cpi_index,
 
@@ -105,6 +105,13 @@ SELECT
     ROUND(
         fed_funds_rate - headline_inflation_yoy_pct,
         2
-    ) AS fed_funds_real_rate_proxy
+    ) AS fed_funds_real_rate_proxy,
+    CASE
+        WHEN fed_funds_rate_change_mom < 0 THEN 'Deeply Expansionary'
+        WHEN (fed_funds_rate_change_mom >= 0 AND fed_funds_rate_change_mom < 0.05) THEN 'Expansionary'
+        WHEN (fed_funds_rate_change_mom >= 0.05 AND fed_funds_rate_change_mom < 1.5) THEN 'Equilibrium'
+        WHEN (fed_funds_rate_change_mom >= 1.5 AND fed_funds_rate_change_mom < 3) THEN 'Contractionary'
+        ELSE 'Severely Contractionary'
+    END AS real_rate_range
 
 FROM monthly_metrics;

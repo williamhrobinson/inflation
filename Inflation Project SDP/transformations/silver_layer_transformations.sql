@@ -13,7 +13,7 @@ CONSTRAINT series_id EXPECT (series_id IS NOT NULL) ON VIOLATION FAIL UPDATE
 )
 
 -- C. Adds a table comment
-COMMENT 'CPIAUCSL - Consumer Price Index for All Urban Consumers: All Items in U.S. City Average'
+COMMENT 'CPIAUCNS - Consumer Price Index for All Urban Consumers: All Items in U.S. City Average'
 
 -- D. Enable liquid clustering to improve performance on common filters.
 CLUSTER BY AUTO
@@ -26,7 +26,7 @@ SELECT
     series_id
 -- F. Incrementally reads data from the bronze table that contains data from three volumes.
 FROM STREAM whriv.economics.fred_series_bz_stream
-WHERE series_id = 'CPIAUCSL';
+WHERE series_id = 'CPIAUCNS';
 
 -- ════════════════════════════════════════════════════════════
 -- -- CORE CPI
@@ -43,7 +43,7 @@ CONSTRAINT series_id EXPECT (series_id IS NOT NULL) ON VIOLATION FAIL UPDATE
 )
 
 -- C. Adds a table comment
-COMMENT 'CPILFESL - Consumer Price Index for All Urban Consumers: All Items Less Food and Energy in U.S. City Average'
+COMMENT 'CPILFENS - Consumer Price Index for All Urban Consumers: All Items Less Food and Energy in U.S. City Average'
 
 -- D. Enable liquid clustering to improve performance on common filters.
 CLUSTER BY AUTO
@@ -56,7 +56,7 @@ SELECT
     series_id
 -- F. Incrementally reads data from the bronze table that contains data from three volumes.
 FROM STREAM whriv.economics.fred_series_bz_stream
-WHERE series_id = 'CPILFESL';
+WHERE series_id = 'CPILFENS';
 
 -- ════════════════════════════════════════════════════════════
 -- -- CORE CPI
