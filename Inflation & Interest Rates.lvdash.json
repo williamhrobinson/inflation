@@ -1,0 +1,604 @@
+{
+  "datasets": [
+    {
+      "name": "4103bd84",
+      "displayName": "Monthly Macro Aggregations",
+      "queryLines": [
+        "SELECT *\n",
+        "FROM monthly_macro_agg_gd\n",
+        "ORDER BY release_date DESC;"
+      ],
+      "catalog": "whriv",
+      "schema": "economics"
+    }
+  ],
+  "pages": [
+    {
+      "name": "10be247c",
+      "displayName": "Inflation Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "50aa8f77",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# Inflation & Interest Rates: Are Savers Keeping Up?\n",
+                "\n",
+                "This dashboard compares headline CPI, core CPI, and the federal funds rate to show how inflation and monetary policy have moved together, and whether the interest rate has kept pace with rising prices.\n",
+                "\n",
+                "**What you'll find here**\n",
+                "\n",
+                "- Year-over-year headline vs. core inflation (core excludes food and energy)\n",
+                "- The fed funds rate over time\n",
+                "- A real rate proxy (fed funds rate minus headline inflation): positive means rates are running ahead of inflation"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "headline-inflation-yoy-change",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4103bd84",
+                  "fields": [
+                    {
+                      "name": "headline_inflation_yoy_pct",
+                      "expression": "`headline_inflation_yoy_pct`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "headerAlignment": "center",
+                "title": {
+                  "value": "<span style=\"font-size:18px\">Headline CPI (YoY %)</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "headline_inflation_yoy_pct",
+                  "rowNumber": 1
+                },
+                "target": {
+                  "fieldName": "headline_inflation_yoy_pct",
+                  "rowNumber": 2,
+                  "change": {
+                    "type": "numeric"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "25668713",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4103bd84",
+                  "fields": [
+                    {
+                      "name": "core_inflation_yoy_pct",
+                      "expression": "`core_inflation_yoy_pct`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "headerAlignment": "center",
+                "title": {
+                  "value": "<span style=\"font-size:18px\">Core CPI (YoY %)</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "core_inflation_yoy_pct",
+                  "rowNumber": 1
+                },
+                "target": {
+                  "fieldName": "core_inflation_yoy_pct",
+                  "rowNumber": 2,
+                  "change": {
+                    "type": "numeric",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "compact",
+                      "decimalPlaces": {
+                        "type": "max",
+                        "places": 2
+                      }
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 4,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "f0cd32f6",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4103bd84",
+                  "fields": [
+                    {
+                      "name": "fed_funds_rate",
+                      "expression": "`fed_funds_rate`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "headerAlignment": "center",
+                "title": {
+                  "value": "<span style=\"font-size: 18px;\">Fed Funds Rate (%)</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "fed_funds_rate",
+                  "rowNumber": 1
+                },
+                "target": {
+                  "fieldName": "fed_funds_rate",
+                  "rowNumber": 2,
+                  "change": {
+                    "type": "numeric"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 4,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "headline-core-cpi-observation-date",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4103bd84",
+                  "fields": [
+                    {
+                      "name": "monthly(release_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `release_date`)"
+                    },
+                    {
+                      "name": "sum(headline_inflation_yoy_pct)",
+                      "expression": "SUM(`headline_inflation_yoy_pct`)"
+                    },
+                    {
+                      "name": "sum(core_inflation_yoy_pct)",
+                      "expression": "SUM(`core_inflation_yoy_pct`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "IN_RANGE(`release_date`, DATE'2019-01-01T00:00:00.000', NULL)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\">Headline vs. Core CPI (YoY %)</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(release_date)",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "sum(headline_inflation_yoy_pct)",
+                      "displayName": "Headline CPI"
+                    },
+                    {
+                      "fieldName": "sum(core_inflation_yoy_pct)",
+                      "displayName": "Core CPI"
+                    }
+                  ],
+                  "axis": {
+                    "hideTitle": true
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "fed-funds-rate-observation-date",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4103bd84",
+                  "fields": [
+                    {
+                      "name": "sum(fed_funds_real_rate_proxy)",
+                      "expression": "SUM(`fed_funds_real_rate_proxy`)"
+                    },
+                    {
+                      "name": "first(real_rate_range)",
+                      "expression": "FIRST(`real_rate_range`)"
+                    },
+                    {
+                      "name": "monthly(release_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `release_date`)"
+                    },
+                    {
+                      "name": "sum(fed_funds_rate)",
+                      "expression": "SUM(`fed_funds_rate`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\">Fed Funds Rate</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "lineShape": "step"
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(release_date)",
+                  "axis": {
+                    "hideLabels": false,
+                    "hideGrid": false,
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(fed_funds_rate)",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "displayName": "Fed Funds Rate",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": false
+                },
+                "extra": [
+                  {
+                    "fieldName": "sum(fed_funds_real_rate_proxy)",
+                    "displayName": "Real Rate"
+                  },
+                  {
+                    "fieldName": "first(real_rate_range)",
+                    "displayName": "Rate Rate Range"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 7,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "5981633a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4103bd84",
+                  "fields": [
+                    {
+                      "name": "sum(fed_funds_real_rate_proxy)",
+                      "expression": "SUM(`fed_funds_real_rate_proxy`)"
+                    },
+                    {
+                      "name": "first(real_rate_range)",
+                      "expression": "FIRST(`real_rate_range`)"
+                    },
+                    {
+                      "name": "monthly(release_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `release_date`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\">Real Rate Proxy (Fed Funds - Headline CPI, pts)</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "lineShape": "step"
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(release_date)",
+                  "axis": {
+                    "hideLabels": false,
+                    "hideGrid": false,
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(fed_funds_real_rate_proxy)",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "displayName": "Real Rate",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": false
+                },
+                "extra": [
+                  {
+                    "fieldName": "sum(fed_funds_real_rate_proxy)",
+                    "displayName": "Real Rate"
+                  },
+                  {
+                    "fieldName": "first(real_rate_range)",
+                    "displayName": "Rate Rate Range"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 7,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bddaa35e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4103bd84",
+                  "fields": [
+                    {
+                      "name": "fed_funds_real_rate_proxy",
+                      "expression": "`fed_funds_real_rate_proxy`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "headerAlignment": "center",
+                "title": {
+                  "value": "<span style=\"font-size:18px\">Real Rate (%)</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "fed_funds_real_rate_proxy",
+                  "rowNumber": 1
+                },
+                "target": {
+                  "fieldName": "fed_funds_real_rate_proxy",
+                  "rowNumber": 2,
+                  "change": {
+                    "type": "numeric"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 4,
+            "width": 3,
+            "height": 3
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "73024d1c",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "4e14bf9e",
+            "queries": [
+              {
+                "name": "dashboards/01f1c8cf727014199337d61b90c0520b/datasets/01f1c8cf7a5d1e26bee9128da5a8ebd0_release_date",
+                "query": {
+                  "datasetName": "4103bd84",
+                  "fields": [
+                    {
+                      "name": "release_date",
+                      "expression": "`release_date`"
+                    },
+                    {
+                      "name": "release_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "selection": {
+                "defaultSelection": {
+                  "operator": {
+                    "operator": "AND",
+                    "args": []
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true
+              },
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "release_date",
+                    "queryName": "dashboards/01f1c8cf727014199337d61b90c0520b/datasets/01f1c8cf7a5d1e26bee9128da5a8ebd0_release_date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
