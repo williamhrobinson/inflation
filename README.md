@@ -18,16 +18,18 @@ This breaks into three sub-questions:
 
 ## Why It Matters
 
-The federal funds rate is the Fed's main policy tool, but a rate level means little on its own. What matters for borrowers, savers, and banks is the rate *relative to inflation*. Comparing headline inflation with core inflation (which excludes food and energy) also shows whether price pressure is broad and persistent or driven by volatile items.
+The federal funds rate is the Fed's main policy tool, but a rate level means little on its own. What matters for borrowers, savers, and banks is the rate *relative to inflation*. A positive real rate means policy is restrictive and savers are earning more than prices are rising. A negative real rate means the opposite, which favors borrowers. Comparing headline inflation with core inflation (which excludes food and energy) also shows whether price pressure is broad and persistent or driven by volatile items.
 
 ## Key Findings
 
-<!-- Replace the brackets with numbers from the gold table. Keep each finding to one sentence with a month and a value. -->
-
-- The real federal funds rate was negative in **44 of 93 months** between January 2019 and September 2026, and first turned positive in **May 2023**.
+- The real federal funds rate was negative in **44 of the 92 months** with a calculable real rate between January 2019 and September 2026 (October 2025 has no CPI data), and returned to positive territory in **May 2023**.
 - Headline inflation peaked at **9.06%** in **June 2022**, compared with **5.92%** for core inflation.
 - The headline-to-core gap was widest at **3.14 percentage points** in **June 2022**.
 - The policy rate reached **5.33%** in **August 2023**, about **14 months** after headline inflation peaked.
+
+## Dashboard
+
+The Databricks AI/BI dashboard, titled **"Are Savers Keeping Up?"**, sits on top of the gold table. It shows counters for headline CPI, core CPI, and the federal funds rate (with the change versus the prior month), plus line charts for headline vs. core CPI, the federal funds rate, and the real rate proxy. The exported dashboard file is in `dashboard/`.
 
 ---
 
@@ -36,9 +38,9 @@ The federal funds rate is the Fed's main policy tool, but a rate level means lit
 ```mermaid
 flowchart LR
     A["FRED API<br/>CPIAUCNS, CPILFENS, FEDFUNDS"] --> B["Bronze<br/>raw observations"]
-    B --> C["Silver<br/>typed and de-duplicated"]
+    B --> C["Silver<br/>typed, de-duplicated, validated"]
     C --> D["Gold<br/>monthly inflation and policy table"]
-    D --> E["Analysis / dashboard"]
+    D --> E["Databricks dashboard"]
 ```
 
 ## Data Sources
@@ -51,15 +53,21 @@ All data comes from the Federal Reserve Bank of St. Louis (FRED) API.
 | `CPILFENS` | CPI for All Urban Consumers: All Items Less Food and Energy (core), not seasonally adjusted | Monthly | Index, 1982-84 = 100 |
 | `FEDFUNDS` | Federal funds effective rate, monthly average | Monthly | Percent |
 
-<!-- Confirm these series IDs match what your notebooks actually pull. -->
-
 ## Pipeline Layers
 
 | Layer | Table | What happens |
 |---|---|---|
 | Bronze | `fred_series_bz` | Raw API responses stored as strings (`series_id`, `date`, `value`) with an ingestion timestamp. Nothing is cleaned, so the source can always be traced. |
-| Silver | `fact_economic_observations_sr` | Values converted to numbers (FRED's `.` for missing becomes null), dates typed, duplicates removed (latest ingest wins), data-quality checks applied. One row per series per month. |
+| Silver | `fact_economic_observations_sr` | Values converted to numbers (FRED's `.` for missing becomes null), dates typed, duplicates removed (latest ingest wins), data-quality expectations applied. One row per series per month. |
 | Gold | `monthly_macro_agg_gd` | One row per month, with the three series pivoted side by side and the derived inflation and policy metrics calculated. |
+
+## Data Quality
+
+The silver layer uses Spark Declarative Pipeline **expectations** to validate data before it reaches gold.
+
+| Expectation | What it checks | On failure |
+|---|---|---|
+| `[series_id]` | `[series_id is not null, so every row traces back to a FRED series]` | `[fail]` |
 
 ## Gold Table: Data Dictionary
 
@@ -72,48 +80,49 @@ All data comes from the Federal Reserve Bank of St. Louis (FRED) API.
 | `headline_inflation_yoy_pct` | Headline year-over-year inflation (%) | `(CPI_t / CPI_t-12 - 1) x 100` |
 | `core_inflation_yoy_pct` | Core year-over-year inflation (%) | `(Core_t / Core_t-12 - 1) x 100` |
 | `fed_funds_rate_change_mom` | Month-over-month change in the policy rate, in percentage points | `FFR_t - FFR_t-1` |
-| `fed_funds_real_rate` | Real rate proxy, in percentage points | `fed_funds_rate_pct - headline_inflation_yoy_pct` |
+| `fed_funds_real_rate_proxy` | Real rate proxy, in percentage points | `fed_funds_rate_pct - headline_inflation_yoy_pct` |
 
 ## Design Decisions
 
 - **Bronze stays raw.** All values are stored as strings with an ingestion timestamp, so schema or format surprises never break the load, and every number can be traced back to its API response.
-- **Safe reruns.** Each load deletes the rows for the series it is refreshing and appends the new pull, so rerunning the pipeline never creates duplicates and adding a series never erases the others.
+- **Safe reruns.** Bronze appends each pull with an ingestion timestamp, and silver keeps the latest ingest per series and month, so rerunning the pipeline never creates duplicates downstream and adding a series never erases the others.
 - **Year-over-year uses date joins, not row offsets.** Prior-year values are found with `add_months(observation_date, -12)` rather than `LAG(12)`, so a missing month produces a null in the right place instead of shifting every later row.
 - **Not seasonally adjusted CPI.** BLS reports year-over-year inflation from non-seasonally-adjusted indexes, so using them lets the results reconcile to published BLS figures.
 - **Credentials stay out of the code.** The FRED API key is read from a Databricks secret scope.
-- **Known data gap.** BLS did not publish an October 2025 CPI index (data was not collected during the fall 2025 federal government shutdown). That month is kept as a null row, so year-over-year inflation for October 2025 and October 2026 is null, and so is the real-rate proxy for those months. Nothing is filled in or interpolated.
+- **Known data gap.** BLS did not publish an October 2025 CPI index (data was not collected during the fall 2025 federal government shutdown). That month is kept as a null row, so year-over-year inflation for October 2025 is null, and October 2026 will be null too once it is published, because its prior-year base is missing. The real-rate proxy is null for those months. Nothing is filled in or interpolated, which is why the CPI lines on the dashboard show a break near the end of 2025.
 
 ## Limitations
 
 - The real rate is a **simple ex-post measure**: it subtracts *past* 12-month inflation from the current policy rate. It does not use inflation expectations or an estimate of the neutral rate, so it is a rough gauge of policy stance, not a precise one.
 - Headline and core CPI are U.S. city averages and do not reflect regional or household-level differences.
 - Core inflation excludes food and energy by definition, so it can understate the inflation people feel day to day.
-- The federal funds rate is a monthly average and can lag the Fed's actual policy decisions by part of a month.
+- The federal funds rate is a monthly average, so it can lag the Fed's actual policy decisions by part of a month. For example, a mid-month change such as the September 2026 rate increase is only partly reflected in that month's figure.
 
 ## How to Run
 
 1. Create a free [FRED API key](https://fred.stlouisfed.org/docs/api/api_key.html) and store it in a Databricks secret scope.
-2. Set your catalog and schema names at the top of the bronze notebook.
-3. Run the notebooks in order: bronze (extract and load), silver (clean), gold (build the monthly table).
-4. <!-- Optional: schedule the notebooks as a monthly Databricks Job. CPI is released around the 10th to 14th of each month, so a run on the 15th picks up all of it. -->
+2. Create a Spark Declarative Pipeline in your workspace and add the bronze, silver, and gold source files from `pipeline/`.
+3. In the pipeline settings, set your catalog and target schema.
+4. Run the pipeline. The bronze step pulls the FRED series on each run and appends the results; silver keeps only the latest ingest for each series and month, so reruns don't create duplicates downstream.
+5. Import the `.lvdash.json` file from `dashboard/` into your workspace, then update the dataset queries to point at your own catalog and schema.
 
 ## Repository Structure
 
-<!-- Update to match your repo. -->
-
 ```
 .
-├── notebooks/
+├── pipeline/
 │   ├── 01_bronze_ingest
 │   ├── 02_silver_clean
 │   └── 03_gold_build
-├── docs/
+├── sql/            # dashboard dataset queries
+├── dashboard/      # exported .lvdash.json
+├── images/         # dashboard screenshots
 └── README.md
 ```
 
 ## Tech Stack
 
-Databricks (Delta Lake, Unity Catalog, notebooks, dashboard) | Python (`requests`, `pandas`) | PySpark and SQL | FRED API
+Databricks (Spark Declarative Pipelines, Delta Lake, Unity Catalog, AI/BI dashboards) | Python (`requests`, `pandas`) | PySpark and SQL | FRED API
 
 ## Data Attribution
 

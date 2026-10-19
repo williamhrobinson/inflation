@@ -8,7 +8,7 @@ CREATE OR REFRESH STREAMING TABLE whriv.economics.headline_cpi_sr
   value            DOUBLE,
   series_id        STRING,
 
--- B. Data quality constraints to drop or flag or drop invalid rows.
+-- B. Data quality constraints to drop, flag or fail invalid rows.
 CONSTRAINT series_id EXPECT (series_id IS NOT NULL) ON VIOLATION FAIL UPDATE
 )
 
@@ -38,7 +38,7 @@ CREATE OR REFRESH STREAMING TABLE whriv.economics.core_cpi_sr
   value            DOUBLE,
   series_id        STRING,
 
--- B. Data quality constraints to drop or flag or drop invalid rows.
+-- B. Data quality constraints to drop, flag or fail invalid rows.
 CONSTRAINT series_id EXPECT (series_id IS NOT NULL) ON VIOLATION FAIL UPDATE
 )
 
@@ -68,7 +68,7 @@ CREATE OR REFRESH STREAMING TABLE whriv.economics.fed_funds_rate_sr
   value            DOUBLE,
   series_id        STRING,
 
--- B. Data quality constraints to drop or flag or drop invalid rows.
+-- B. Data quality constraints to drop, flag or fail invalid rows.
 CONSTRAINT series_id EXPECT (series_id IS NOT NULL) ON VIOLATION FAIL UPDATE
 )
 
@@ -98,7 +98,7 @@ CREATE OR REFRESH STREAMING TABLE whriv.economics.fact_economic_observations_sr
   value            DOUBLE,
   series_id        STRING,
 
--- B. Data quality constraints to drop or flag or drop invalid rows.
+-- B. Data quality constraints to drop, flag or fail invalid rows.
 CONSTRAINT series_id EXPECT (series_id IS NOT NULL) ON VIOLATION FAIL UPDATE
 )
 
